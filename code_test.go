@@ -59,20 +59,22 @@ func TestParsing(t *testing.T) {
 		input  string
 		output advent.ExprNode
 	}{
-		{" 1", advent.ExprNode{Children: []advent.Evaluator{advent.ValueNode{Value: 1}}}},
-		{"2 + 1", advent.ExprNode{Children: []advent.Evaluator{
-			advent.ValueNode{Value: 2},
-			advent.OperatorNode{Value: "+"},
-			advent.ValueNode{Value: 1},
-		}}},
+		// {" 1", advent.ExprNode{Children: []advent.Evaluator{advent.ValueNode{Value: 1}}}},
+		// {"2 + 1", advent.ExprNode{Children: []advent.Evaluator{
+		// 	advent.ValueNode{Value: 2},
+		// 	advent.OperatorNode{Value: "+"},
+		// 	advent.ValueNode{Value: 1},
+		// }}},
+		{"((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2", advent.ExprNode{Children: []advent.Evaluator{advent.ValueNode{Value: 1}}}},
 	}
 	for _, tc := range tcs {
 		lexer := advent.NewLexer(tc.input)
 		tokens := lexer.Tokenize()
 		parser := advent.NewParser(&tokens)
-		got := parser.Parse()
+		got := parser.ParseTerm()
 		want := tc.output
 		if diff := cmp.Diff(want, got); diff != "" {
+			fmt.Println(got)
 			t.Errorf("Token map() mismatch for %s (-want +got):\n%s", tc.input, diff)
 		}
 	}
@@ -90,7 +92,7 @@ func TestEvaluate(t *testing.T) {
 		lexer := advent.NewLexer(tc.input)
 		tokens := lexer.Tokenize()
 		parser := advent.NewParser(&tokens)
-		got := parser.Parse().Evaluate()
+		got := parser.ParseTerm().Evaluate()
 		want := tc.output
 		if want != got {
 			t.Errorf("Wanted %v but got %v for %v", want, got, tc.input)
@@ -98,14 +100,17 @@ func TestEvaluate(t *testing.T) {
 	}
 }
 
-func TestPart1(t *testing.T) {
+func TestE2E(t *testing.T) {
 	tcs := []struct {
 		input  string
 		output int
 	}{
 		{"1 + 2 * 3 + 4 * 5 + 6", 71},
-		{"3 + 7 + 8 * 4", 72},
-		// {"1 + (2 * 3) + (4 * (5 + 6))", 51},
+		{"1 + (2 * 3) + (4 * (5 + 6))", 51},
+		{"2 * 3 + (4 * 5)", 26},
+		{"5 + (8 * 3 + 9 + 3 * 4 * 3)", 437},
+		{"5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))", 12240},
+		// {"((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2", 13632},
 	}
 	for _, tc := range tcs {
 		got := advent.NewMath(tc.input)
@@ -113,13 +118,12 @@ func TestPart1(t *testing.T) {
 			t.Errorf("Wanted %v but got %v for %v", tc.output, got, tc.input)
 		}
 	}
-	// fmt.Println()
-	// fmt.Println(advent.Part1("input.txt"))
-
 }
 
-// func TestPart2(t *testing.T) {
-// 	fmt.Println(advent.Part2("sample.txt"))
-// 	fmt.Println(advent.Part2("input.txt"))
-// 	t.Fail()
-// }
+func TestPart1(t *testing.T) {
+	fmt.Println(advent.Part1("sample.txt"))
+	fmt.Println(advent.Part1("input.txt"))
+	t.Fail()
+}
+
+// 54 * 126 + 6 * 2

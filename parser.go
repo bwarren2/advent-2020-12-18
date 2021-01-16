@@ -1,7 +1,10 @@
 package advent20201218
 
 import (
+	"fmt"
 	"strconv"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 const (
@@ -31,6 +34,7 @@ func (e ExprNode) Evaluate() int {
 			start *= next.Evaluate()
 		}
 	}
+
 	return start
 }
 
@@ -64,9 +68,15 @@ func NewParser(tokens *[]Token) Parser {
 	}
 }
 
-func (p Parser) Parse() ExprNode {
+func (p *Parser) ParseTerm() ExprNode {
 	root := ExprNode{}
-	for len(*p.tokens) > 0 {
+	needsMatchingParen := false
+	if p.FirstToken().TokenType == OPAREN {
+		p.ConsumeTokens(1)
+		needsMatchingParen = true
+	}
+	for len(*p.tokens) > 0 && p.FirstToken().TokenType != CPAREN {
+		fmt.Println(p.tokens)
 		switch (*p.tokens)[0].TokenType {
 		case OPAREN:
 			root.Children = append(root.Children, p.ParseTerm())
@@ -77,17 +87,21 @@ func (p Parser) Parse() ExprNode {
 		case WHITESPACE:
 			p.ParseWhitespace()
 		case CPAREN:
-			panic("Mismatched parens!")
+			break
 		default:
 			panic("Didn't know what to do!")
 		}
 	}
-	return root
-}
 
-func (p Parser) ParseExpr() ExprNode {
-	expr := ExprNode{}
-	return expr
+	if needsMatchingParen {
+		if p.FirstToken().TokenType == CPAREN {
+			p.ConsumeTokens(1)
+		} else {
+			spew.Dump(root)
+			panic("Did not have a matching paren!")
+		}
+	}
+	return root
 }
 
 func (p *Parser) ParseWhitespace() {
@@ -116,10 +130,6 @@ func (p *Parser) ParseOperator() OperatorNode {
 		return OperatorNode{Value: "*"}
 	}
 	return OperatorNode{Value: ""}
-}
-
-func (p *Parser) ParseTerm() ExprNode {
-	return ExprNode{}
 }
 
 func (p *Parser) ConsumeTokens(count int) {
