@@ -1,10 +1,7 @@
 package advent20201218
 
 import (
-	"fmt"
 	"strconv"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 const (
@@ -70,42 +67,28 @@ func NewParser(tokens *[]Token) Parser {
 
 func (p *Parser) ParseTerm() ExprNode {
 	root := ExprNode{}
-	needsMatchingParen := false
-	if p.FirstToken().TokenType == OPAREN {
-		p.ConsumeTokens(1)
-		needsMatchingParen = true
-	}
+
 	for len(*p.tokens) > 0 && p.FirstToken().TokenType != CPAREN {
-		fmt.Println(p.tokens)
 		switch (*p.tokens)[0].TokenType {
 		case OPAREN:
+			p.ConsumeTokens(1)
 			root.Children = append(root.Children, p.ParseTerm())
+			if p.FirstToken().TokenType != CPAREN {
+				panic("Need a closing brace after an opening brace!")
+			}
+			p.ConsumeTokens(1)
 		case ADD, MUL:
 			root.Children = append(root.Children, p.ParseOperator())
 		case INTEGER:
 			root.Children = append(root.Children, p.ParseInteger())
 		case WHITESPACE:
-			p.ParseWhitespace()
-		case CPAREN:
-			break
+			p.ConsumeTokens(1)
 		default:
 			panic("Didn't know what to do!")
 		}
 	}
 
-	if needsMatchingParen {
-		if p.FirstToken().TokenType == CPAREN {
-			p.ConsumeTokens(1)
-		} else {
-			spew.Dump(root)
-			panic("Did not have a matching paren!")
-		}
-	}
 	return root
-}
-
-func (p *Parser) ParseWhitespace() {
-	p.ConsumeTokens(1)
 }
 
 func (p Parser) FirstToken() Token {

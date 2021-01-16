@@ -125,5 +125,3 @@ func TestPart1(t *testing.T) {
 	fmt.Println(advent.Part1("input.txt"))
 	t.Fail()
 }
-
-// 54 * 126 + 6 * 2
