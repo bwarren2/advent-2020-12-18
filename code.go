@@ -4,7 +4,7 @@ func NewMath(input string) int {
 	lexer := NewLexer(input)
 	tokens := lexer.Tokenize()
 	parser := NewParser(&tokens)
-	return parser.ParseTerm().Evaluate()
+	return parser.ParseTerm().FlatPrecedenceEvaluate()
 }
 
 // Part1 solves part1

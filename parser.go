@@ -12,23 +12,23 @@ const (
 var operators [2]int = [2]int{MULTIPLICATION, ADDITION}
 
 type Evaluator interface {
-	Evaluate() int
+	FlatPrecedenceEvaluate() int
 }
 
 type ExprNode struct {
 	Children []Evaluator
 }
 
-func (e ExprNode) Evaluate() int {
-	start := e.Children[0].Evaluate()
+func (e ExprNode) FlatPrecedenceEvaluate() int {
+	start := e.Children[0].FlatPrecedenceEvaluate()
 	for i := 1; i < len(e.Children); i += 2 {
 		operator := e.Children[i]
 		next := e.Children[i+1]
-		switch operator.Evaluate() {
+		switch operator.FlatPrecedenceEvaluate() {
 		case 1:
-			start += next.Evaluate()
+			start += next.FlatPrecedenceEvaluate()
 		case 0:
-			start *= next.Evaluate()
+			start *= next.FlatPrecedenceEvaluate()
 		}
 	}
 
@@ -39,7 +39,7 @@ type ValueNode struct {
 	Value int
 }
 
-func (v ValueNode) Evaluate() int {
+func (v ValueNode) FlatPrecedenceEvaluate() int {
 	return v.Value
 }
 
@@ -47,7 +47,7 @@ type OperatorNode struct {
 	Value string
 }
 
-func (o OperatorNode) Evaluate() int {
+func (o OperatorNode) FlatPrecedenceEvaluate() int {
 	if o.Value == "*" {
 		return 0
 	}

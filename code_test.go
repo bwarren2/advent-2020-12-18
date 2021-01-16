@@ -59,13 +59,13 @@ func TestParsing(t *testing.T) {
 		input  string
 		output advent.ExprNode
 	}{
-		// {" 1", advent.ExprNode{Children: []advent.Evaluator{advent.ValueNode{Value: 1}}}},
-		// {"2 + 1", advent.ExprNode{Children: []advent.Evaluator{
-		// 	advent.ValueNode{Value: 2},
-		// 	advent.OperatorNode{Value: "+"},
-		// 	advent.ValueNode{Value: 1},
-		// }}},
-		{"((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2", advent.ExprNode{Children: []advent.Evaluator{advent.ValueNode{Value: 1}}}},
+		{" 1", advent.ExprNode{Children: []advent.Evaluator{advent.ValueNode{Value: 1}}}},
+		{"2 + 1", advent.ExprNode{Children: []advent.Evaluator{
+			advent.ValueNode{Value: 2},
+			advent.OperatorNode{Value: "+"},
+			advent.ValueNode{Value: 1},
+		}}},
+		// {"((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2", advent.ExprNode{Children: []advent.Evaluator{advent.ValueNode{Value: 1}}}},
 	}
 	for _, tc := range tcs {
 		lexer := advent.NewLexer(tc.input)
@@ -80,7 +80,7 @@ func TestParsing(t *testing.T) {
 	}
 }
 
-func TestEvaluate(t *testing.T) {
+func TestFlatPrecedenceEvaluate(t *testing.T) {
 	tcs := []struct {
 		input  string
 		output int
@@ -92,7 +92,7 @@ func TestEvaluate(t *testing.T) {
 		lexer := advent.NewLexer(tc.input)
 		tokens := lexer.Tokenize()
 		parser := advent.NewParser(&tokens)
-		got := parser.ParseTerm().Evaluate()
+		got := parser.ParseTerm().FlatPrecedenceEvaluate()
 		want := tc.output
 		if want != got {
 			t.Errorf("Wanted %v but got %v for %v", want, got, tc.input)
@@ -123,5 +123,5 @@ func TestE2E(t *testing.T) {
 func TestPart1(t *testing.T) {
 	fmt.Println(advent.Part1("sample.txt"))
 	fmt.Println(advent.Part1("input.txt"))
-	t.Fail()
+	// t.Fail()
 }
