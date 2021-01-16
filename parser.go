@@ -1,6 +1,7 @@
 package advent20201218
 
 import (
+	"fmt"
 	"strconv"
 )
 
@@ -13,6 +14,7 @@ var operators [2]int = [2]int{MULTIPLICATION, ADDITION}
 
 type Evaluator interface {
 	FlatPrecedenceEvaluate() int
+	AdditionFirstEvaluate() int
 }
 
 type ExprNode struct {
@@ -35,6 +37,29 @@ func (e ExprNode) FlatPrecedenceEvaluate() int {
 	return start
 }
 
+func (e ExprNode) AdditionFirstEvaluate() int {
+	reducedChildren := []Evaluator{}
+	start := e.Children[0].AdditionFirstEvaluate()
+	for i := 1; i < len(e.Children); {
+		operator := e.Children[i]
+		next := e.Children[i+1]
+		switch operator.AdditionFirstEvaluate() {
+		case 1:
+			start += next.AdditionFirstEvaluate()
+			i += 2
+		case 0:
+			reducedChildren = append(reducedChildren, ValueNode{Value: start}, operator)
+			start = e.Children[i+1].AdditionFirstEvaluate()
+			i += 2
+		default:
+			panic(fmt.Sprintf("What is this operator? %v", operator.AdditionFirstEvaluate()))
+		}
+	}
+	reducedChildren = append(reducedChildren, ValueNode{Value: start})
+	e.Children = reducedChildren
+	return e.FlatPrecedenceEvaluate()
+}
+
 type ValueNode struct {
 	Value int
 }
@@ -43,11 +68,21 @@ func (v ValueNode) FlatPrecedenceEvaluate() int {
 	return v.Value
 }
 
+func (v ValueNode) AdditionFirstEvaluate() int {
+	return v.Value
+}
+
 type OperatorNode struct {
 	Value string
 }
 
 func (o OperatorNode) FlatPrecedenceEvaluate() int {
+	if o.Value == "*" {
+		return 0
+	}
+	return 1
+}
+func (o OperatorNode) AdditionFirstEvaluate() int {
 	if o.Value == "*" {
 		return 0
 	}
