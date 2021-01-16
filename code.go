@@ -1,11 +1,16 @@
+package advent20201218
 
-
-// Part1 solves part1
-func Part1(filename string) int {
-
+func NewMath(input string) int {
+	lexer := NewLexer(input)
+	tokens := lexer.Tokenize()
+	parser := NewParser(&tokens)
+	return parser.Parse().Evaluate()
 }
 
-// Part2 solves part2
-func Part2(filename string) int {
-
+// Part1 solves part1
+func Part1(filename string) (total int) {
+	for _, tc := range RecordsFromFile(filename) {
+		total += NewMath(tc)
+	}
+	return
 }
